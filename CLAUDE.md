@@ -208,3 +208,30 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+---
+
+# Common Development Tasks
+
+To work with this Docusaurus codebase, use the following commands:
+
+- **Install Dependencies**: `npm install`
+- **Start Development Server**: `npm start`
+- **Build Project**: `npm run build`
+- **Lint Code**: `npm run lint` (if configured)
+- **Run Tests**: `npm test` (if configured)
+
+# High-Level Code Architecture and Structure
+
+This project is built using Docusaurus, a static site generator, leveraging React for UI components and MDX for rich documentation content.
+
+## Key Directories and Files:
+
+- `physical-ai-and-humanoid-robotics/`: The root directory of the Docusaurus project.
+- `physical-ai-and-humanoid-robotics/docusaurus.config.ts`: The main configuration file for Docusaurus, defining global settings, theme, navbar items, and plugins.
+- `physical-ai-and-humanoid-robotics/sidebars.ts`: Configures the structure and order of the documentation sidebar navigation.
+- `physical-ai-and-humanoid-robotics/docs/`: Contains all Markdown (`.md`) and MDX (`.mdx`) files that make up the textbook content, organized into modules, appendices, and other sections.
+- `physical-ai-and-humanoid-robotics/src/pages/`: Holds React components for custom pages, such as `index.tsx` which defines the homepage layout and content.
+- `physical-ai-and-humanoid-robotics/src/components/`: Intended for reusable React components that can be used across the site.
+- `physical-ai-and-humanoid-robotics/src/css/custom.css`: Contains global CSS styles and defines custom theme variables for consistent styling.
+

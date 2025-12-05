@@ -1,0 +1,12 @@
+.navbarPlaceholderButton {
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px; /* Add some spacing between buttons */
+}
+
+.navbarPlaceholderButton:hover {
+  opacity: 0.8;
+}
