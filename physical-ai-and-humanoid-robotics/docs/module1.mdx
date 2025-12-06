@@ -10,11 +10,161 @@ Module 1 introduces the Robotic Operating System 2 (ROS 2), a flexible framework
 
 ### Key Concepts
 
-*   **Nodes**: The fundamental building blocks of a ROS 2 system, representing independent executable processes.
-*   **Topics**: A publish/subscribe mechanism for asynchronous data exchange between nodes.
-*   **Services**: A request/reply communication model for synchronous interactions, useful for specific actions or queries.
-*   **Actions**: Designed for long-running, goal-oriented tasks that require feedback and the ability to be preempted.
-*   **Parameters**: Configuration values that can be dynamically adjusted for ROS 2 nodes.
+#### 1. Nodes
+
+Nodes are the fundamental computational units in ROS 2. They are independent executable processes responsible for specific tasks within a robotic system. Nodes are designed to be modular, allowing developers to break down complex functionalities into manageable parts.
+
+*   **Modularity:** Each node typically performs a single, well-defined purpose, such as controlling motors, processing sensor data, or executing an algorithm.
+*   **Communication:** Nodes communicate with each other using various mechanisms: Topics (publish/subscribe), Services (request/response), Actions (long-running tasks), and Parameters (configuration).
+*   **ROS 2 Graph:** The entire network of interconnected nodes, topics, services, actions, and parameters forms the ROS 2 computational graph.
+
+:::tip Example: Nodes in `turtlesim`
+When you run the `turtlesim` simulation, you typically launch two nodes:
+*   The `/turtlesim` node: This is the simulator itself, rendering the turtle graphics.
+*   The `/teleop_turtle` node: This node allows you to control the turtle using keyboard input.
+
+You can inspect running nodes using the ROS 2 command-line tool:
+
+```bash
+# List all running nodes
+ros2 node list
+
+# Get detailed info about a specific node
+ros2 node info /teleop_turtle
+```
+:::
+
+#### 2. Topics
+
+Topics implement a publish/subscribe communication model for asynchronous, real-time data streaming between nodes. They are ideal for continuous data flows, such as sensor readings or robot state updates.
+
+*   **Publish/Subscribe:** One or more nodes (publishers) send data to a named topic, and other nodes (subscribers) receive that data. All subscribers to a topic receive the published data.
+*   **Unidirectional and Asynchronous:** Data flows from publisher to subscriber without the publisher waiting for acknowledgment.
+*   **Many-to-Many:** Multiple publishers can send data to a single topic, and multiple subscribers can receive data from it.
+*   **Messages:** Data exchanged over topics are strongly-typed messages, defined in `.msg` files.
+
+:::tip Example: Publishing a Simple Message in ROS 2 (Python)
+This snippet shows a basic ROS 2 publisher node that sends "Hello World" messages.
+
+```python
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+class SimplePublisher(Node):
+    def __init__(self):
+        super().__init__('simple_publisher')
+        self.publisher_ = self.create_publisher(String, 'chatter', 10)
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+    def timer_callback(self):
+        msg = String()
+        msg.data = f'Hello World: {self.i}'
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: "{msg.data}"')
+        self.i += 1
+
+def main(args=None):
+    rclpy.init(args=args)
+    simple_publisher = SimplePublisher()
+    rclpy.spin(simple_publisher)
+    simple_publisher.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+To see this in action, you can run:
+
+```bash
+# In one terminal, run the talker node
+ros2 run your_package_name simple_publisher
+
+# In another terminal, listen to the 'chatter' topic
+ros2 topic echo /chatter
+```
+:::
+
+#### 3. Services
+
+Services provide a synchronous request/response communication model between nodes. They are used for one-time interactions that require an immediate reply, such as triggering a specific action or querying for a piece of information.
+
+*   **Client-Server:** A client node sends a request to a server node, which processes it and sends a response back. The client waits for the response.
+*   **Synchronous:** The client blocks until it receives a response from the server.
+*   **Service Definitions:** Defined in `.srv` files, which specify the structure of both the request and the response.
+
+:::tip Example: Clearing `turtlesim` with a Service
+The `turtlesim` provides a service to clear its canvas.
+
+```bash
+# List available services
+ros2 service list
+
+# Show the type of the 'clear' service
+ros2 service type /clear
+
+# Call the 'clear' service (it's of type Empty, so no arguments are needed)
+ros2 service call /clear std_srvs/srv/Empty "{}"
+```
+:::
+
+#### 4. Actions
+
+Actions are designed for long-running, goal-oriented tasks that require continuous feedback and can be preempted (canceled). They combine aspects of both topics and services.
+
+*   **Goal, Feedback, Result:** An action client sends a `Goal` to an action server, receives continuous `Feedback` on its progress, and ultimately gets a `Result` upon completion or preemption.
+*   **Preemptable:** Clients can send a request to cancel an ongoing action.
+*   **Asynchronous (from client perspective):** The client doesn't block while waiting for the action to complete; it can continue other tasks while monitoring feedback.
+
+:::tip Example: Rotating `turtlesim` with an Action
+The `turtlesim` package includes an action server for absolute rotation.
+
+```bash
+# List available actions
+ros2 action list
+
+# Get info about the rotate_absolute action
+ros2 action info /turtle1/rotate_absolute
+
+# Call the rotate_absolute action to set an absolute angle (e.g., 90 degrees/1.57 radians)
+ros2 action send_goal /turtle1/rotate_absolute turtlesim/action/RotateAbsolute "{theta: 1.57}"
+```
+
+When this command is run, you will see feedback on the turtle's current rotation, and eventually, the final result.
+:::
+
+#### 5. Parameters
+
+Parameters are configuration values associated with individual nodes, allowing for dynamic behavior changes without modifying the node's core code. They are essential for creating flexible and adaptable robotic software.
+
+*   **Configuration:** Parameters define node settings, like a robot's speed limit or navigation waypoints.
+*   **Dynamic Customization:** Values can be set at startup (via CLI or YAML files) and modified at runtime.
+*   **Node-Specific:** Each ROS 2 node maintains its own set of parameters.
+*   **Data Types:** Support various types including integers, floats, booleans, strings, and arrays.
+
+:::tip Example: Manipulating ROS 2 Parameters
+Let's say a `turtlesim` node has a parameter `background_r` for its background color's red component.
+
+```bash
+# List all parameters for the turtlesim node
+ros2 param list /turtlesim
+
+# Get the current value of a parameter
+ros2 param get /turtlesim background_r
+
+# Set a new value for a parameter (e.g., change background red component to 255)
+ros2 param set /turtlesim background_r 255
+
+# Dump all parameters of a node to a YAML file
+ros2 param dump /turtlesim > turtlesim_params.yaml
+
+# Load parameters from a YAML file (useful for consistent startup configs)
+ros2 param load /turtlesim turtlesim_params.yaml
+```
+:::
 
 ### Learning Outcomes
 
@@ -28,3 +178,19 @@ By the end of this module, students will be able to:
 ### Conclusion
 
 ROS 2 provides a robust and scalable infrastructure for robotics development. A solid grasp of its core principles is essential for integrating hardware, implementing complex behaviors, and collaborating on large-scale robotics projects.
+
+---
+**Sources:**
+*   [ROS 2 Overview | ROS 2 Documentation](https://docs.ros.org/en/humble/Concepts/About-ROS-2-concepts.html)
+*   [Understanding ROS 2 Nodes | ROS 2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html)
+*   [ROS 2 Nodes: The Basic Building Blocks - Robotics Unleashed](https://robotisim.com/blogs/articles/ros2-nodes-the-basic-building-blocks)
+*   [ROS 2 Topics: The Backbone of Data Flow - Robotics Unleashed](https://robotisim.com/blogs/articles/ros2-topics-the-backbone-of-data-flow)
+*   [Understanding ROS 2 Topics | ROS 2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
+*   [ROS 2 Topic Data: std_msgs/msg/String - MathWorks](https://www.mathworks.com/help/robotics/ref/ros2std_msgsmsgstring.html)
+*   [ROS 2 Services: On-Demand Communication - Robotics Unleashed](https://robotisim.com/blogs/articles/ros2-services-on-demand-communication)
+*   [Understanding ROS 2 Services | ROS 2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html)
+*   [ROS 2 actions | ROS 2 Documentation](https://docs.ros.org/en/humble/Concepts/Basic-Actions/Understanding-ROS2-Actions.html)
+*   [ROS 2 Actions: Long-Running Tasks with Feedback - Robotics Unleashed](https://robotisim.com/blogs/articles/ros2-actions-long-running-tasks-with-feedback)
+*   [Understanding ROS 2 Parameters | ROS 2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Parameters/Understanding-ROS2-Parameters.html)
+*   [ROS 2 Parameters in Depth - Foxglove](https://foxglove.dev/blog/ros-2-parameters-in-depth)
+*   [ROS 2 Parameters: Dynamic Configuration for Nodes - Automatic Addison](https://automaticaddison.com/ros-2-parameters-dynamic-configuration-for-nodes/)

@@ -17,6 +17,111 @@ Gazebo is a powerful open-source 3D simulator specifically designed for robotics
 *   **Sensor Emulation**: Mimics various sensor outputs, including cameras, LiDAR, and IMUs, crucial for perception system development.
 *   **ROS 2 Integration**: Seamlessly interfaces with ROS 2, enabling the control and monitoring of simulated robots using real robot software.
 
+:::info Transition to Gazebo Sim
+As of January 2025, Gazebo Classic reaches its end-of-life. New ROS 2 distributions (like Jazzy) will primarily support **Gazebo Sim**. This module will focus on setup and concepts relevant to Gazebo Sim.
+:::
+
+#### Setting up Gazebo Sim with ROS 2
+
+To get started with Gazebo Sim and ROS 2, follow these general steps:
+
+1.  **Install ROS 2**: Ensure you have a working ROS 2 environment installed. For optimal compatibility, use the recommended ROS 2 distribution for your Gazebo Sim version.
+    ```bash
+    # Example: Install ROS 2 Humble (Ubuntu 20.04/22.04)
+    # Refer to the official ROS 2 documentation for detailed instructions:
+    # https://docs.ros.org/en/humble/Installation.html
+    sudo apt update && sudo apt install locales
+    sudo locale-gen en_US en_US.UTF-8
+    sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+    export LANG=en_US.UTF-8
+
+    sudo apt install software-properties-common
+    sudo add-apt-repository universe
+
+    sudo apt update && sudo apt install curl -y
+    sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+    sudo apt update
+    sudo apt upgrade
+    sudo apt install ros-humble-desktop-full
+    ```
+
+2.  **Install Gazebo Sim**: Install Gazebo Sim and its ROS 2 integration packages.
+    ```bash
+    # Example: Install Gazebo Sim (Garden)
+    # Refer to the official Gazebo documentation for the latest installation instructions:
+    # https://gazebosim.org/docs/garden/install_ubuntu
+    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-full `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-latest.list'
+    wget https://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+    sudo apt update
+    sudo apt install ros-humble-gazebo-ros-pkgs gazebo-garden
+    ```
+    (Note: Replace `ros-humble-gazebo-ros-pkgs` and `gazebo-garden` with versions compatible with your ROS 2 distribution and desired Gazebo Sim version.)
+
+3.  **Source Setup Files**: Always source your ROS 2 and Gazebo setup files in each new terminal.
+    ```bash
+    source /opt/ros/humble/setup.bash
+    source /usr/share/gazebo/setup.sh
+    ```
+
+#### Basic Interaction with Gazebo Sim
+
+Once installed, you can launch Gazebo Sim and spawn simple robots.
+
+*   **Launch Gazebo Sim**:
+    ```bash
+    gazebo
+    ```
+    This command opens the Gazebo Sim GUI, where you can load worlds and models.
+
+*   **Example: Spawning a Simple Robot (using `ros_gz_sim`)**:
+    ROS 2 packages like `ros_gz_sim` (formerly `ros_gz_bridge`) provide tools to spawn models and bridge communication between ROS 2 and Gazebo Sim.
+
+    1.  **Install `ros_gz_sim`**:
+        ```bash
+        sudo apt install ros-humble-ros-gz-sim
+        ```
+
+    2.  **Create a Simple URDF**: Create a `simple_box.urdf` file in your ROS 2 workspace:
+        ```xml
+        <?xml version="1.0"?>
+        <robot name="simple_box">
+          <link name="base_link">
+            <visual>
+              <geometry>
+                <box size="0.1 0.1 0.1"/>
+              </geometry>
+              <material name="blue">
+                <color rgba="0 0 1 1"/>
+              </material>
+            </visual>
+            <collision>
+              <geometry>
+                <box size="0.1 0.1 0.1"/>
+              </geometry>
+            </collision>
+            <inertial>
+              <mass value="0.1"/>
+              <inertia ixx="0.000166667" ixy="0" ixz="0" iyy="0.000166667" iyz="0" izz="0.000166667"/>
+            </inertial>
+          </link>
+          <gazebo reference="base_link">
+            <material>Gazebo/Blue</material>
+          </gazebo>
+        </robot>
+        ```
+
+    3.  **Launch Gazebo and Spawn the Robot**:
+        ```bash
+        # In one terminal, launch Gazebo Sim with an empty world
+        ros2 launch gazebo_ros gazebo.launch.py empty_world:=true
+
+        # In another terminal, spawn the robot model
+        ros2 run ros_gz_sim create -topic /spawn_entity -file $(ros2 pkg prefix your_package_name)/share/your_package_name/urdf/simple_box.urdf -name simple_box -x 0 -y 0 -z 0.5
+        ```
+        (Note: Replace `your_package_name` with the actual name of your ROS 2 package where `simple_box.urdf` is located. You'll need to create a package and copy the URDF there.)
+
 ### Unity: High-Fidelity Simulation
 
 Unity, a widely used game development platform, can be adapted for high-fidelity robotic simulations. Its strengths include:
@@ -24,6 +129,43 @@ Unity, a widely used game development platform, can be adapted for high-fidelity
 *   **Advanced Rendering**: Superior visual fidelity for complex environments and human-robot interaction scenarios.
 *   **Flexible Development**: Extensive asset store and scripting capabilities for custom simulations and user interfaces.
 *   **Machine Learning Integration**: Built-in tools and APIs for training AI models in simulated environments.
+
+#### Setting up Unity for Robotics Simulation
+
+To leverage Unity for robotics, the **Unity Robotics Hub** is a crucial resource. It provides tools, demonstrations, and documentation for integrating Unity with robotics frameworks like ROS.
+
+1.  **Install Unity**: Download and install Unity Hub, then install a Unity Editor version (e.g., Unity 2022 LTS or newer recommended for robotics packages).
+2.  **Unity Robotics Hub**: Clone the Unity Robotics Hub GitHub repository:
+    ```bash
+    git clone https://github.com/Unity-Technologies/Unity-Robotics-Hub.git
+    ```
+    This repository contains:
+    *   **Unity Packages**: Essential packages like `com.unity.robotics.ros-tcp-connector` for ROS communication.
+    *   **ROS Examples**: Sample ROS workspaces with scripts for two-way communication.
+    *   **Tutorials**: Step-by-step guides, such as the "Pick-and-Place Tutorial."
+
+#### Integrating with ROS using ROS# (ROS-TCP-Connector)
+
+ROS# (now often referred to as ROS-TCP-Connector) facilitates communication between Unity and ROS/ROS 2.
+
+1.  **Import ROS-TCP-Connector**: In your Unity project, import the `com.unity.robotics.ros-tcp-connector` package from the Unity Robotics Hub.
+2.  **ROS Workspace Setup**: In your ROS workspace, ensure `ros_tcp_endpoint` is installed and running.
+    ```bash
+    # In your ROS 2 workspace
+    ros2 run ros_tcp_endpoint default_server_endpoint
+    ```
+3.  **Unity ROS Connection**: Configure the `ROS Connection` component in Unity (usually on a GameObject) with the correct ROS IP address and port.
+4.  **Publishing/Subscribing**: Use the provided C# scripts and interfaces in Unity to publish sensor data (e.g., camera images, LiDAR scans) from Unity to ROS topics and subscribe to control commands from ROS.
+
+    :::tip Example: Importing a URDF Robot into Unity
+    The Unity Robotics Hub provides a URDF Importer. You can import your robot's URDF file directly into Unity, which generates the 3D model, colliders, and joints within the Unity environment.
+
+    1.  **Open URDF Importer**: In Unity, go to `Robotics > URDF Importer`.
+    2.  **Select URDF File**: Browse and select your robot's `.urdf` file.
+    3.  **Import Options**: Configure import settings, such as physics properties and collision layers.
+    4.  **Generate Robot**: The importer will generate a GameObject hierarchy representing your robot, ready for simulation.
+    :::
+
 
 ### Learning Outcomes
 
