@@ -1,0 +1,148 @@
+.chatbotWindow {
+  position: fixed;
+  bottom: 90px; /* Above the chatbot button */
+  right: 20px;
+  width: 350px;
+  height: 450px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 999; /* Below the button, but above content */
+  font-family: Arial, sans-serif;
+}
+
+.chatHeader {
+  background-color: #f0f2f5;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-weight: bold;
+  text-align: center;
+}
+
+.chatMessages {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.chatInputArea {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.chatInput {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  margin-right: 8px;
+}
+
+.sendButton {
+  background-color: #47A315;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.sendButton:hover {
+  background-color: #3f8f1c;
+}
+
+.userMessage {
+  text-align: right;
+  background-color: #e0f7fa;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  margin-left: auto; /* Push user message to the right */
+  max-width: 80%;
+}
+
+.botMessage {
+  text-align: left;
+  background-color: #f1f0f0;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  margin-right: auto; /* Push bot message to the left */
+  max-width: 80%;
+}
+
+.loadingMessage,
+.timeoutMessage,
+.errorMessage {
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.loadingMessage {
+  color: #555;
+}
+
+.timeoutMessage {
+  color: #ffa726; /* Orange for warning */
+}
+
+.errorMessage {
+  color: #ef5350; /* Red for error */
+}
+
+html[data-theme='dark'] {
+  .chatbotWindow {
+    background-color: #333;
+    border-color: #555;
+    color: #eee; /* Default text color for dark mode */
+  }
+
+  .chatHeader {
+    background-color: #444;
+    border-bottom-color: #555;
+    color: #eee;
+  }
+
+  .chatMessages {
+    background-color: #222;
+  }
+
+  .chatInputArea {
+    border-top-color: #555;
+  }
+
+  .chatInput {
+    background-color: #444;
+    color: #eee;
+    border-color: #666;
+  }
+
+  .userMessage {
+    background-color: #004d40; /* Darker shade of green for user messages */
+    color: #eee;
+  }
+
+  .botMessage {
+    background-color: #555; /* Darker shade of grey for bot messages */
+    color: #eee;
+  }
+
+  .loadingMessage {
+    color: #bbb;
+  }
+
+  .timeoutMessage {
+    color: #ffb74d; /* Lighter orange for warning in dark mode */
+  }
+
+  .errorMessage {
+    color: #ef9a9a; /* Lighter red for error in dark mode */
+  }
+}
