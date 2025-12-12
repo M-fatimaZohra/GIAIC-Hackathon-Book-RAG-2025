@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance, VectorParams
-from my_config.gemini_config import CLIENT # Import the AsyncOpenAI client
+# from my_config.gemini_config import CLIENT # Import the AsyncOpenAI client
 import cohere
 import asyncio
 
@@ -19,7 +19,7 @@ COHERE_API = os.getenv("COHERE_API")
 cohere_client = cohere.Client(COHERE_API)
 client = QdrantClient(url=QDRANT_API_URL, api_key=QDRANT_API_KEY)
 
-COLLECTION_NAME = "docusaurus_book"
+COLLECTION_NAME = "physical-ai-and-humanoid-robotics"
 EMBEDDING_MODEL = "embed-english-v3.0" # Using Cohere's embedding model
 EMBEDDING_DIMENSION = 1024 # Cohere's embed-english-v3.0 dimension
 

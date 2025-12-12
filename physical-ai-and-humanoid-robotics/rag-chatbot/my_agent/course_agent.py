@@ -5,10 +5,10 @@ from agents import Agent, OpenAIChatCompletionsModel, function_tool, Runner
 from my_config.gemini_config import CLIENT
 from rag.retrieve import retrieve_context
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Configure the Gemini model using the AsyncOpenAI client
-MODEL = OpenAIChatCompletionsModel(model="gemini-2.0-flash", openai_client=CLIENT)
+MODEL = OpenAIChatCompletionsModel(model="gemini-2.5-flash-lite", openai_client=CLIENT)
 
 # Define the retrieval tool using @function_tool
 @function_tool
@@ -17,11 +17,11 @@ async def retrieval_tool(query: str, top_k: int = 3) -> dict:
     Retrieve relevant context from the Docusaurus book.
     Returns structured output with 'response' and 'sources'.
     """
-    context_chunks = await retrieve_context(query, top_k)
-    response_text = " ".join(context_chunks)
+    context_chunks, sources = await retrieve_context(query, top_k)
+    response_text = " ".join(context_chunks) if context_chunks else "I don't know."
     return {
-        "response": response_text if response_text else "I don't know.",
-        "sources": context_chunks  # Optional: adjust for frontend
+        "response": response_text,
+        "sources": sources  # Return actual sources
     }
 
 # Initialize the course agent as a variable
