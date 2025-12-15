@@ -1,65 +1,62 @@
 import os
+import traceback
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, models
-from rag.ingest import get_embedding, EMBEDDING_MODEL, EMBEDDING_DIMENSION, COLLECTION_NAME, cohere_client
 import asyncio
-import cohere
+from google import genai
 
 load_dotenv(override=True)
 
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 QDRANT_API_URL = os.getenv("QDRANT_API_URL")
-COHERE_API = os.getenv("COHERE_API")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Initialize Cohere client for async operations if available
-cohere_async_client = cohere.AsyncClient(COHERE_API) if COHERE_API else None
+# Create Gemini client
+genai_client = genai.Client()
 
 client = QdrantClient(url=QDRANT_API_URL, api_key=QDRANT_API_KEY)
 
 async def retrieve_context(query: str, top_k: int = 3) -> list[str]:
+    COLLECTION_NAME = "physical-ai-and-humanoid-robotics"  # Same as in ingest.py
     try:
-        # Use async Cohere client if available, otherwise use sync
-        if cohere_async_client:
-            # Using async Cohere client
-            response = await cohere_async_client.embed(
-                texts=[query],
-                model=EMBEDDING_MODEL,
-                input_type="search_query"
-            )
-            query_vector = response.embeddings[0]
-        else:
-            # Fallback to sync method if async client is not available
-            query_vector = cohere_client.embed(
-                texts=[query],
-                model=EMBEDDING_MODEL,
-                input_type="search_query"
-            ).embeddings[0]
+        print(f"Retrieval Step 1: Starting context retrieval for query: '{query[:50]}...'")
 
-        search_result = client.search(
+        # Generate query embedding with Gemini
+        print("Retrieval Step 2: Generating query embedding with Gemini...")
+        result = genai_client.models.embed_content(
+            model="text-embedding-004",
+            contents=[query]  # Pass as list as shown in the example
+        )
+        query_vector = result.embeddings[0].values
+
+        print(f"Retrieval Step 2: Query embedding completed with dimension {len(query_vector)}")
+
+        print(f"Retrieval Step 3: Searching in Qdrant collection '{COLLECTION_NAME}'...")
+        search_result = client.query_points(
             collection_name=COLLECTION_NAME,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
-            query_filter=None,
             with_payload=True
         )
 
-        # Extract both text and source information
-        context = []
-        sources = []
-        for hit in search_result:
-            if hit.payload and "text" in hit.payload:
-                context.append(hit.payload["text"])
-                if "source" in hit.payload:
-                    sources.append(hit.payload["source"])
+        # Extract context directly from points
+        context = [point.payload["text"] for point in search_result.points]
+        sources = [point.payload.get("source", "") for point in search_result.points if point.payload and "source" in point.payload]
+
+        print(f"Retrieval Step 3: Qdrant search completed, found {len(context)} results")
+
+        print(f"Retrieval Step 4: Context extraction completed. Retrieved {len(context)} context chunks and {len(sources)} sources.")
 
         # Return both context and sources for the response
         return context, sources
     except Exception as e:
-        print(f"Error retrieving context: {e}")
+        print(f"ERROR in retrieve_context - Retrieval Error: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
         return ["Error retrieving context from the knowledge base."], []
 
 if __name__ == "__main__":
-    # Example usage
+    # Example usage for Gemini embedding retrieval
     async def test_retrieve():
         sample_query = "What are the applications of humanoid robotics?"
         context, sources = await retrieve_context(sample_query)

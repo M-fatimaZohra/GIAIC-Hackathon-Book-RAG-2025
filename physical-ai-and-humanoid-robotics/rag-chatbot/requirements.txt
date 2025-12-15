@@ -1,7 +1,0 @@
-openai-agents
-python-dotenv
-qdrant-client
-requests
-cohere
-fastapi
-uvicorn

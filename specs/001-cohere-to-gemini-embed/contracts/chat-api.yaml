@@ -1,0 +1,67 @@
+openapi: 3.0.1
+info:
+  title: RAG Chatbot API
+  description: API for the RAG chatbot that retrieves context from textbook content and generates responses
+  version: 1.0.0
+paths:
+  /api/chat:
+    post:
+      summary: Send a message to the chatbot and receive a response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: The user's message/question
+                  example: "What are the key components of a humanoid robot?"
+                history:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                      content:
+                        type: string
+                  description: Conversation history (optional)
+                  example: []
+              required:
+                - message
+      responses:
+        '200':
+          description: Successful response from the chatbot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    description: The chatbot's response
+                  sources:
+                    type: array
+                    items:
+                      type: string
+                    description: List of source URLs used to generate the response
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: When the response was generated
+                required:
+                  - response
+                  - sources
+                  - timestamp
+        '400':
+          description: Bad request - missing required fields
+        '500':
+          description: Internal server error
+      tags:
+        - chat
+tags:
+  - name: chat
+    description: Chatbot interaction endpoints
