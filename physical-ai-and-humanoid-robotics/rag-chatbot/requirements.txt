@@ -1,0 +1,14 @@
+fastapi>=0.124.1
+google-genai>=1.55.0
+google-generativeai>=0.8.5
+grpcio>=1.76.0
+grpcio-status>=1.62.3
+jiter>=0.12.0
+openai>=2.9.0
+openai-agents>=0.6.2
+protobuf>=4.25.0
+python-dotenv>=1.2.1
+qdrant-client>=1.16.1
+requests>=2.32.5
+trafilatura>=2.0.0
+uvicorn>=0.38.0
