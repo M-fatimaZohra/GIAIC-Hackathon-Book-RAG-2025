@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(git --version)",
+      "Bash(git rev-parse:*)",
+      "Bash(uv add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

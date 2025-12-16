@@ -12,8 +12,6 @@ pnpm-debug.log*
 /book/package-lock.json
 /book/yarn.lock
 
-/.claude/
-/.history/
 .cache/
 
 __pycache__/

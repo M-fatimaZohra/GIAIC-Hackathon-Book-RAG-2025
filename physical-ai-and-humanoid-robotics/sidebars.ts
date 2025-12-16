@@ -24,6 +24,7 @@ const sidebars: SidebarsConfig = {
     'hardware-requirements',
     'robot-lab',
     'cloud-lab',
+    'modules/soft-robotics-humanoid-design',
     'student-kits',    {
       type: 'category',
       label: 'Appendices',
