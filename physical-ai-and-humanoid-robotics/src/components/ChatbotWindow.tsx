@@ -26,18 +26,33 @@ const ChatbotWindow: React.FC<ChatbotWindowProps> = ({ isOpen }) => {
       // Set a timeout for the "taking longer" message
       timeoutRef.current = setTimeout(() => {
         setTimeoutMessage('Sorry, this is taking longer than expected. Please wait, or try again later.');
-      }, 5000); // 5 seconds for demonstration (was 5 minutes)
+      }, 30000); // 30 seconds timeout for backend response
 
       try {
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 seconds delay
+        const response = await fetch('https://giaic-hackathon-book-rag-2025-production.up.railway.app/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: input }),
+        });
 
-        // Simulate an error randomly (e.g., 20% chance)
-        if (Math.random() < 0.2) {
-          throw new Error('Network error or unexpected issue.');
+        if (!response.ok) {
+          throw new Error(`Backend error: ${response.status} ${response.statusText}`);
         }
 
-        const botResponse = { text: `This is a mock response to: "${input}"`, sender: 'bot' as const };
+        const data = await response.json();
+        const botResponse = {
+          text: data.response || 'I don\'t know.',
+          sender: 'bot' as const
+        };
+
+        // Add sources to the response if available
+        if (data.sources && data.sources.length > 0) {
+          const sourcesText = `\n\nSources: ${data.sources.join(', ')}`;
+          botResponse.text += sourcesText;
+        }
+
         setMessages((prevMessages) => [...prevMessages, botResponse]);
       } catch (err) {
         console.error('Chatbot error:', err);

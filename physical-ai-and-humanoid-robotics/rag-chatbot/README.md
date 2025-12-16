@@ -149,6 +149,29 @@ The system relies on several environment variables:
 - `GEMINI_API_KEY`: Google Generative AI API key
 - `GEMINI_BASE_URL`: Base URL for Gemini API endpoints
 
+## Frontend Integration
+
+The RAG chatbot includes a floating chat button that appears on all pages of the Docusaurus site. This button toggles a chat window where users can ask questions about the book content.
+
+The frontend components are located in the `physical-ai-and-humanoid-robotics/src/components/` directory:
+- `ChatbotButton.tsx` - The floating button component
+- `ChatbotWindow.tsx` - The chat interface component
+- `ChatbotButton.module.css` - Styling for the button
+- `ChatbotWindow.module.css` - Styling for the chat window
+
+These components are integrated into the Docusaurus layout through the `physical-ai-and-humanoid-robotics/src/theme/Root.tsx` file, which makes them available on all pages.
+
+## Frontend-Backend Integration
+
+The frontend chatbot communicates with a deployed backend API at `https://giaic-hackathon-book-rag-2025-production.up.railway.app/api/chat`. When a user submits a question:
+
+1. The frontend sends a POST request to the backend API with the user's message
+2. The backend processes the query using the RAG pipeline (retrieval + generation)
+3. The backend returns a response with optional sources
+4. The frontend displays the response in the chat window
+
+The integration is documented in detail in [INTEGRATION.md](INTEGRATION.md).
+
 ## Development
 
 The project follows a structured development approach using the Spec-Kit Plus methodology:
